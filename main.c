@@ -37,4 +37,31 @@ void run_shell_loop() {
 }
 
 void execute_command(char *input) {
+    char *args[MAX_ARGS];
+    int i = 0;
+    
+    args[i] = strtok(input, " ");
+    while (args[i] != NULL && i < MAX_ARGS - 1) {
+        i++;
+        args[i] = strtok(NULL, " ");
+    }
+    args[i] = NULL;
+
+    if (args[0] == NULL) {
+        return;
+    }
+
+    pid_t pid = fork();
+    if (pid < 0) {
+        perror("fork failed");
+    } else if (pid == 0) {
+        // Child process
+        if (execvp(args[0], args) == -1) {
+            perror("execvp failed");
+        }
+        exit(EXIT_FAILURE);
+    } else {
+        // Parent process
+        wait(NULL);
+    }
 }
